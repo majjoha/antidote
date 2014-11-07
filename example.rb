@@ -28,15 +28,9 @@ class Point
     puts y
   end
   annotate("self.foo", y: Fixnum)
-
-  def booyah(z)
-    puts "Booyah: #{y}"
-  end
-  annotate("booyah", z: Array(Float))
 end
 
 p = Point.new(1, 2)
 c = Coordinates.new(3, 4)
-#Point.foo(5)
+Point.foo(5)
 p.move(3, c)
-p.booyah([3])
