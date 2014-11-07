@@ -1,5 +1,5 @@
 module Antidote
-  class TypeError < StandardError
+  class VariableTypeError < StandardError
     def initialize(types)
       @actual_type, @expected_type, @variable_name, @method_name = types
     end
@@ -13,68 +13,50 @@ module Antidote
   module ClassMethods
     @@type_constraints = Hash.new { |h, k| h[k] = [] }
 
+    def add_type_constraint_for(method_name, type_constraint)
+      @@type_constraints[method_name] << {variable => type}
+    end
+
     def annotate(method_name, type_constraints)
       type_constraints.each do |variable, type|
-        add_type_constraint_for(method_name, {variable => type})
+        @@type_constraints[method_name] << {variable => type}
       end
-      define_type_constrained_method(method_name) {}
-      # type_check(method_name)
-    end
 
-    def add_type_constraint_for(method, type_contract)
-      @@type_constraints[method] << type_contract
-    end
-
-    def type_check(method_name)
-      trace_point = TracePoint.new(:return) do |t|
-        # event type specification is optional
-        puts "returning #{t.return_value} from #{t.defined_class}.#{t.method_id}"
-      end
-      # set_trace_func proc { |event, file, line, id, binding, classname|
-      #   binding.eval("local_variables").each do |var|
-      #     puts var
-      #   end
-
-      #   puts "ID: #{id}\tClassname: #{classname} called" if event == 'call' &&
-      #     classname != Antidote::ClassMethods
-      # }
-    end
-
-    def define_type_constrained_method(method_name, *args)
       if method_name.start_with?("self")
-        # http://apidock.com/ruby/UnboundMethod
-        # http://ruby-doc.org/core-2.1.4/UnboundMethod.html
-        # http://ruby-doc.org/core-2.1.4/Method.html
-        # http://apidock.com/ruby/Module/instance_method
-        m = self.method(method_name.split(".").last)
-        define_singleton_method(method_name.split(".").last) do |*args|
+        method_name = method_name.split(".").last
+        new_name_for_old_function = "#{method_name}_old".to_sym
+        self.singleton_class.send(:alias_method, new_name_for_old_function,
+                                    method_name)
+        define_singleton_method(method_name) do |*args|
           args.each_with_index do |argument_value, index|
             actual_type   = argument_value.class
-            expected_type = @@type_constraints[method_name][index].values.first
-            variable_name = @@type_constraints[method_name][index].keys.first
+            expected_type =
+              @@type_constraints["self.#{method_name}"][index].values.first
+            variable_name =
+              @@type_constraints["self.#{method_name}"][index].keys.first
 
             unless actual_type == expected_type
-              raise Antidote::TypeError,
-                [actual_type, expected_type, variable_name, method_name]
+              raise Antidote::VariableTypeError,
+                [actual_type, expected_type, variable_name, "self.#{method_name}"]
             end
           end
-          m.bind(self).(*args, &block)
+          self.send(new_name_for_old_function, *args)
         end
       else
-        m = instance_method(method_name)
-        define_method(method_name) do |*args, &block|
+        new_name_for_old_function = "#{method_name}_old".to_sym
+        alias_method(new_name_for_old_function, method_name)
+        define_method(method_name) do |*args|
           args.each_with_index do |argument_value, index|
-            yield
             actual_type   = argument_value.class
             expected_type = @@type_constraints[method_name][index].values.first
             variable_name = @@type_constraints[method_name][index].keys.first
 
             unless actual_type == expected_type
-              raise Antidote::TypeError,
+              raise Antidote::VariableTypeError,
                 [actual_type, expected_type, variable_name, method_name]
             end
           end
-          m.bind(self).(*args, &block)
+          send(new_name_for_old_function, *args)
         end
       end
     end
