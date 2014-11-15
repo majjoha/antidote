@@ -1,3 +1,5 @@
+require_relative 'antidote/type_checker'
+
 module Antidote
   class VariableTypeError < StandardError
     def initialize(types)
@@ -13,51 +15,66 @@ module Antidote
   module ClassMethods
     @@type_constraints = Hash.new { |h, k| h[k] = [] }
 
-    def add_type_constraint_for(method_name, type_constraint)
-      @@type_constraints[method_name] << {variable => type}
+    def annotate(method_name, type_constraints)
+      add_type_constraints(method_name, type_constraints)
+
+      if class_method?(method_name)
+        define_type_check_for_class_method(method_name)
+      else
+        define_type_check_for_instance_method(method_name)
+      end
     end
 
-    def annotate(method_name, type_constraints)
+    private
+
+    def add_type_constraints(method_name, type_constraints)
       type_constraints.each do |variable, type|
         @@type_constraints[method_name] << {variable => type}
       end
+    end
 
-      if method_name.start_with?("self")
-        method_name = method_name.split(".").last
-        new_name_for_old_function = "#{method_name}_old".to_sym
-        self.singleton_class.send(:alias_method, new_name_for_old_function,
-                                    method_name)
-        define_singleton_method(method_name) do |*args|
-          args.each_with_index do |argument_value, index|
-            actual_type   = argument_value.class
-            expected_type =
-              @@type_constraints["self.#{method_name}"][index].values.first
-            variable_name =
-              @@type_constraints["self.#{method_name}"][index].keys.first
+    def class_method?(method_name)
+      method_name.split(".").first == "self"
+    end
 
-            unless actual_type == expected_type
-              raise Antidote::VariableTypeError,
-                [actual_type, expected_type, variable_name, "self.#{method_name}"]
-            end
+    def define_type_check_for_class_method(method_name)
+      method_name = method_name.split(".").last
+      new_name_for_old_function = "#{method_name}_old".to_sym
+      self.singleton_class.send(:alias_method, new_name_for_old_function,
+                                method_name)
+      define_singleton_method(method_name) do |*args|
+        args.each_with_index do |argument_value, index|
+          actual_type   = argument_value.class
+          expected_type =
+            @@type_constraints["self.#{method_name}"][index].values.first
+         variable_name =
+            @@type_constraints["self.#{method_name}"][index].keys.first
+
+          unless actual_type == expected_type
+            raise Antidote::VariableTypeError,
+              [actual_type, expected_type, variable_name, "self.#{method_name}"]
           end
-          self.send(new_name_for_old_function, *args)
         end
-      else
-        new_name_for_old_function = "#{method_name}_old".to_sym
-        alias_method(new_name_for_old_function, method_name)
-        define_method(method_name) do |*args|
-          args.each_with_index do |argument_value, index|
-            actual_type   = argument_value.class
-            expected_type = @@type_constraints[method_name][index].values.first
-            variable_name = @@type_constraints[method_name][index].keys.first
+        self.send(new_name_for_old_function, *args)
+      end
+    end
 
-            unless actual_type == expected_type
-              raise Antidote::VariableTypeError,
-                [actual_type, expected_type, variable_name, method_name]
-            end
+    def define_type_check_for_instance_method(method_name)
+      new_name_for_old_function = "#{method_name}_old".to_sym
+      alias_method(new_name_for_old_function, method_name)
+      define_method(method_name) do |*args|
+        args = args.select { |arg| !arg.nil? }
+        args.each_with_index do |argument_value, index|
+          actual_type   = argument_value.class
+          expected_type = @@type_constraints[method_name][index].values.first
+          variable_name = @@type_constraints[method_name][index].keys.first
+
+          unless actual_type == expected_type
+            raise Antidote::VariableTypeError,
+              [actual_type, expected_type, variable_name, method_name]
           end
-          send(new_name_for_old_function, *args)
         end
+        send(new_name_for_old_function, *args)
       end
     end
   end
