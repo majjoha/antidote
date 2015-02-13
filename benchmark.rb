@@ -1,18 +1,18 @@
-require_relative 'lib/antidote'
-require 'benchmark'
+require_relative "lib/antidote"
+require "benchmark/ips"
 
 class Point
   include Antidote
 
+  annotate [[x: Fixnum], Fixnum],
   def foo(x)
     x
   end
-  annotate("foo", x: Fixnum)
 
+  annotate_class_method [[y: Float], Float],
   def self.bar(y)
     y
   end
-  annotate("self.bar", y: Float)
 
   def baz(q)
     q
@@ -31,7 +31,7 @@ n = 1_000_000
 # Type checking class methods is ~1600 percent slower than running them without
 # type checking.
 
-Benchmark.bmbm do |x|
+Benchmark.ips do |x|
   x.report("Instance method with type checking") do
     n.times do
       Point.new.foo(5)
