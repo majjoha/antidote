@@ -14,18 +14,23 @@ end
 class Foo
   include Antidote
 
+  annotate [[x: Fixnum], Fixnum],
   def bar(x)
     x
   end
-  annotate("bar", x: Fixnum)
 
+  annotate [[z: CustomType], Fixnum],
   def baz(z)
     z.a + z.b
   end
-  annotate("baz", z: CustomType)
 
+  annotate [[a: Fixnum, b: Fixnum], String],
+  def qux(a, b)
+    a + b
+  end
+
+  annotate_class_method [[y: Float, name: String], Array],
   def self.quux(y, name)
     [name, y]
   end
-  annotate("self.quux", y: Float, name: String)
 end
