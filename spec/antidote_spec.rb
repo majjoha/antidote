@@ -14,16 +14,6 @@ describe Antidote do
       end
     end
 
-    describe ".quux" do
-      it "raises an error when the method is given the wrong types" do
-        expect { Foo.quux(43, 6.66) }.to raise_error
-      end
-
-      it "returns [name, y] when given the right arguments" do
-        expect(Foo.quux(6.66, "Hello")).to eq ["Hello", 6.66]
-      end
-    end
-
     describe "#baz" do
       let(:custom_type) { CustomType.new(1, 2) }
 
@@ -33,6 +23,22 @@ describe Antidote do
 
       it "returns x.a + x.b when given the right arguments" do
         expect(foo.baz(custom_type)).to eq 3
+      end
+    end
+
+    describe "#qux" do
+      it "raises an error when the return type is wrong" do
+        expect { foo.qux(1,2) }.to raise_error
+      end
+    end
+
+    describe ".quux" do
+      it "raises an error when the method is given the wrong types" do
+        expect { Foo.quux(43, 6.66) }.to raise_error
+      end
+
+      it "returns [name, y] when given the right arguments" do
+        expect(Foo.quux(6.66, "Hello")).to eq ["Hello", 6.66]
       end
     end
   end
