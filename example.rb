@@ -19,15 +19,17 @@ class Point
     @y = y
   end
 
-  annotate [[x: Fixnum, coordinates: Coordinates], Fixnum],
+  annotate Fixnum, Coordinates, Fixnum do
   def move(x, name)
     puts "x is #{x}, @x is #{@x}, name is #{name.x} #{name.y}"
     5
   end
+  end
 
-  annotate_class_method [[y: Fixnum], Fixnum],
+  annotate_class_method Fixnum, Fixnum do
   def self.foo(y)
     y
+  end
   end
 end
 
