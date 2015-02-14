@@ -5,8 +5,8 @@ module Antidote
     end
 
     def message
-      "`#{@method_name}` expected to return #{@expected_type}, but returned " \
-      "a #{@actual_type}"
+      "Expected `#{@method_name}` to return a #{@expected_type}, but it " \
+      "returned a #{@actual_type} instead"
     end
   end
 end
