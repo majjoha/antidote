@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    antidote (1.0.0)
+    antidote-types (1.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -51,7 +51,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  antidote!
+  antidote-types!
   coveralls (~> 0.7)
   rake (~> 10.3.1)
   rspec (~> 2.14)
