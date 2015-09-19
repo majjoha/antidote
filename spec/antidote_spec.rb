@@ -6,7 +6,7 @@ describe Antidote do
 
     describe "#bar" do
       it "raises an error when the method is given the wrong type" do
-        expect { foo.bar(5.4) }.to raise_error
+        expect { foo.bar(5.4) }.to raise_error(Antidote::VariableTypeError)
       end
 
       it "returns x when given the right argument" do
@@ -18,7 +18,7 @@ describe Antidote do
       let(:custom_type) { CustomType.new(1, 2) }
 
       it "raises an error when the method is given the wrong types" do
-        expect { foo.baz(5.5) }.to raise_error
+        expect { foo.baz(5.5) }.to raise_error(Antidote::VariableTypeError)
       end
 
       it "returns x.a + x.b when given the right arguments" do
@@ -28,13 +28,13 @@ describe Antidote do
 
     describe "#qux" do
       it "raises an error when the return type is wrong" do
-        expect { foo.qux(1,2) }.to raise_error
+        expect { foo.qux(1,2) }.to raise_error(Antidote::ReturnTypeError)
       end
     end
 
     describe ".quux" do
       it "raises an error when the method is given the wrong types" do
-        expect { Foo.quux(43, 6.66) }.to raise_error
+        expect { Foo.quux(43, 6.66) }.to raise_error(Antidote::VariableTypeError)
       end
 
       it "returns [name, y] when given the right arguments" do
