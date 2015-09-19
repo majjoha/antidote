@@ -3,7 +3,7 @@ $:.unshift(File.expand_path('../lib/', __FILE__))
 require 'antidote/version'
 
 Gem::Specification.new do |s|
-  s.name        = "antidote"
+  s.name        = "antidote-types"
   s.version     = Antidote::VERSION
   s.date        = "2015-09-19"
   s.summary     = "A highly experimental type assertion library"
