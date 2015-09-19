@@ -1,4 +1,8 @@
 # Antidote
+[![Gem Version](https://badge.fury.io/rb/antidote-types.svg)](http://badge.fury.io/rb/antidote-types)
+[![Build Status](https://travis-ci.org/majjoha/antidote.svg)](https://travis-ci.org/majjoha/antidote)
+[![Coverage Status](https://coveralls.io/repos/majjoha/antidote/badge.svg?branch=master&service=github)](https://coveralls.io/github/majjoha/antidote?branch=master)
+
 Antidote is a small, highly experimental library that performs runtime type
 assertions in Ruby in the same vein as
 [Rubype](https://github.com/gogotanaka/Rubype),
