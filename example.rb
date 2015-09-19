@@ -1,39 +1,28 @@
 require_relative 'lib/antidote'
 
-class Coordinates
-  attr_accessor :x, :y
-
-  def initialize(x, y)
-    @x = x
-    @y = y
-  end
-end
-
-class Point
+class Adder
   include Antidote
 
-  attr_accessor :x, :y
-
-  def initialize(x, y)
-    @x = x
-    @y = y
-  end
-
-  annotate Fixnum, Coordinates, Fixnum do
-  def move(x, name)
-    puts "x is #{x}, @x is #{@x}, name is #{name.x} #{name.y}"
-    5
-  end
-  end
-
-  annotate_class_method Fixnum, Fixnum do
-  def self.foo(y)
-    y
+  annotate Fixnum, Fixnum, Fixnum do
+  def add(x, y)
+    x + y
   end
   end
 end
 
-p = Point.new(1, 2)
-c = Coordinates.new(3, 4)
-Point.foo(5)
-p.move(3, c)
+class Printer
+  include Antidote
+
+  annotate_class_method Adder, Fixnum do
+  def self.print(adder)
+    # FIXME: Both arguments should be Fixnums
+    adder.add(1, "1")
+  end
+  end
+end
+
+begin
+  puts Printer.print(Adder.new)
+rescue Antidote::VariableTypeError
+  puts "Please, fix `self.print', so it calls #add with only Fixnums."
+end
