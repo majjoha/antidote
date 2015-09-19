@@ -1,6 +1,9 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
+require 'coveralls'
 require './lib/antidote'
+
+Coveralls.wear!
 
 class CustomType
   attr_accessor :a, :b
